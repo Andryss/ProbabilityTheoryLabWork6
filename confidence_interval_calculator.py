@@ -15,17 +15,25 @@ class ConfidenceIntervalInfo:
 
 
 class SeriesInfo:
-    pass
+
+    def __str__(self) -> str:
+        return "<empty series>"
 
 
 class SeriesInfoWithSourceSeries(SeriesInfo):
     source_series: np.ndarray
+
+    def __str__(self) -> str:
+        return f"series {self.source_series}"
 
 
 class SeriesInfoWithCharacteristics(SeriesInfo):
     length: int
     series_sum: float
     series_squares_sum: float
+
+    def __str__(self) -> str:
+        return f"series with length {self.length}, sum {self.series_sum}, squares sum {self.series_squares_sum}"
 
 
 def calculate_confident_interval(series_info: SeriesInfo, upsilon: float) -> ConfidenceIntervalInfo:
@@ -88,7 +96,8 @@ def calculate_confident_intervals(interval_info: ConfidenceIntervalInfo, upsilon
 
 
 def calculate_mean_interval_tiny_sample(interval_info: ConfidenceIntervalInfo, upsilon: float):
-    corrected_sample_variance = interval_info.length / (interval_info.length - 1) * interval_info.sample_variance
+    corrected_sample_variance = \
+        math.sqrt(interval_info.length / (interval_info.length - 1) * interval_info.sample_variance)
     t_student = student_distribution_coefficient_resolver(interval_info.length - 1, (1 + upsilon) / 2)
     mean_range = t_student * corrected_sample_variance / math.sqrt(interval_info.length)
     interval_info.sample_mean_interval = (
@@ -111,6 +120,6 @@ def calculate_variance_interval(interval_info: ConfidenceIntervalInfo, upsilon: 
     xi_left = pearson_distribution_coefficient_resolver(interval_info.length - 1, (1 + upsilon) / 2)
     xi_right = pearson_distribution_coefficient_resolver(interval_info.length - 1, (1 - upsilon) / 2)
     interval_info.sample_variance_interval = (
-        interval_info.length * corrected_sample_variance ** 2 / xi_left,
-        interval_info.length * corrected_sample_variance ** 2 / xi_right
+        interval_info.length * corrected_sample_variance / xi_left,
+        interval_info.length * corrected_sample_variance / xi_right
     )

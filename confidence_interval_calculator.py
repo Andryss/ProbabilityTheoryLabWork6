@@ -23,17 +23,39 @@ class SeriesInfo:
 class SeriesInfoWithSourceSeries(SeriesInfo):
     source_series: np.ndarray
 
+    def __init__(self, ss) -> None:
+        self.source_series = ss
+
     def __str__(self) -> str:
         return f"series {self.source_series}"
 
 
 class SeriesInfoWithCharacteristics(SeriesInfo):
     length: int
+
     series_sum: float
+    sample_mean: float
+
     series_squares_sum: float
+    series_centered_squares_sum: float
+    sample_derivative: float
+
+    _source_string: str
+
+    def __init__(self, ln, ss, sm, sss, scss, sd) -> None:
+        self.length = ln
+        self.series_sum, self.sample_mean = ss, sm
+        self.series_squares_sum, self.series_centered_squares_sum, self.sample_derivative = sss, scss, sd
+        self._source_string = f"series with" \
+               f"{f' length {self.length}' if self.length is not None else ''}" \
+               f"{f' sum {self.series_sum}' if self.series_sum is not None else ''}" \
+               f"{f' mean {self.sample_mean}' if self.sample_mean is not None else ''}" \
+               f"{f' squares sum {self.series_squares_sum}' if self.series_squares_sum is not None else ''}" \
+               f"{f' centered squares sum {self.series_centered_squares_sum}' if self.series_centered_squares_sum is not None else ''}" \
+               f"{f' derivative {self.sample_derivative}' if self.sample_derivative is not None else ''}"
 
     def __str__(self) -> str:
-        return f"series with length {self.length}, sum {self.series_sum}, squares sum {self.series_squares_sum}"
+        return self._source_string
 
 
 def calculate_confident_interval(series_info: SeriesInfo, upsilon: float) -> ConfidenceIntervalInfo:
@@ -72,12 +94,11 @@ def calculate_confident_interval_from_characteristics(series_info: SeriesInfoWit
 
     confidence_interval_info.length = series_info.length
 
-    confidence_interval_info.sample_mean = series_info.series_sum / series_info.length
+    confidence_interval_info.sample_mean = series_info.sample_mean
 
-    confidence_interval_info.sample_variance = \
-        series_info.series_squares_sum / series_info.length - confidence_interval_info.sample_mean ** 2
+    confidence_interval_info.sample_variance = series_info.sample_derivative ** 2
 
-    confidence_interval_info.sample_deviation = math.sqrt(confidence_interval_info.sample_variance)
+    confidence_interval_info.sample_deviation = series_info.sample_derivative
 
     calculate_confident_intervals(confidence_interval_info, upsilon)
 

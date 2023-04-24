@@ -48,10 +48,10 @@ def poisson_distribution_check(distribution_info: DistributionInfo, upsilon: flo
     merged_data = theoretical_data.drop(index=range(merge_row, theoretical_data.shape[0]))
     merged_data.loc[merge_row] = [-1, new_n_i, new_p_i, new_n_i_thr]
 
-    merged_data = merged_data.drop(['p_i'], axis=1).assign(unknown=lambda col: (col['n_i'] - col['n_i_thr']) ** 2 / col['n_i_thr'])
+    merged_data = merged_data.drop(['p_i'], axis=1).assign(chi2_i=lambda col: (col['n_i'] - col['n_i_thr']) ** 2 / col['n_i_thr'])
     distribution_result.number_of_groups_after_merge = len(merged_data)
 
-    chi2_observable = merged_data['unknown'].sum()
+    chi2_observable = merged_data['chi2_i'].sum()
     distribution_result.chi2_observable = chi2_observable
 
     chi2_critical = pearson_distribution_coefficient_resolver(distribution_result.number_of_groups_after_merge - 1 - 1, 1 - upsilon)

@@ -89,7 +89,7 @@ def run():
     try:
         run_with_series(get_task1_task7_numbers())
         run_with_info(get_task2_task7_info())
-        run_with_distribution(get_task_test_distribution())
+        run_with_distribution(get_task3_task17_distribution())
     except Exception as e:
         print(e, file=sys.stderr)
 

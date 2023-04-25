@@ -20,6 +20,7 @@ class DistributionCheckResult:
 class PoissonDistributionCheckResult(DistributionCheckResult):
     sample_lambda: float
     number_of_groups_after_merge: int
+    theoretical_distribution: pd.DataFrame
     chi2_observable: float
     chi2_critical: float
     is_poisson_distribution: bool
@@ -53,7 +54,9 @@ def poisson_distribution_check(distribution_info: DistributionInfo, upsilon: flo
         new_n_i_thr += theoretical_data.at[merge_row, 'n_i_thr']
 
     merged_data = theoretical_data.drop(index=range(merge_row, theoretical_data.shape[0]))
-    merged_data.loc[merge_row] = [-1, new_n_i, new_p_i, new_n_i_thr]
+    merged_data.loc[merge_row] = [f">{merged_data['i'].max()}", new_n_i, new_p_i, new_n_i_thr]
+
+    distribution_result.theoretical_distribution = merged_data.drop(['p_i'], axis=1).copy()
 
     # calculate chi2 observable and critical
     merged_data = merged_data.drop(['p_i'], axis=1)\

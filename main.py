@@ -67,6 +67,7 @@ def print_poisson_distribution_result(distribution_check_result: PoissonDistribu
     print(f"\nSource distribution:")
     print(f"{distribution_check_result.source_distribution.set_index('i').T}")
     print(f"\nLambda parameter: {distribution_check_result.sample_lambda}")
+    print(f"\nTheoretical poisson distribution:\n{distribution_check_result.theoretical_distribution.set_index('i').T}")
     print(f"\nChi2 observable: {distribution_check_result.chi2_observable}")
     print(f"Chi2 critical: {distribution_check_result.chi2_critical}")
     print(f"\nVerdict (is poisson distribution?): {distribution_check_result.is_poisson_distribution}")

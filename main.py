@@ -6,9 +6,10 @@ from distribution_holder import *
 from distribution_checker import *
 
 
-def print_interval_info(series_info: SeriesInfo, interval_info: ConfidenceIntervalInfo):
+def print_interval_info(series_info: SeriesInfo, upsilon: float, interval_info: ConfidenceIntervalInfo):
     print(f"\n----------RESULT----------")
     print(f"{series_info}:")
+    print(f"upsilon: {upsilon}")
     print(f"\nLength: {interval_info.length}")
     print(f"\nSample mean: {interval_info.sample_mean}")
     print(f"Interval: ({interval_info.sample_mean_interval[0]},{interval_info.sample_mean_interval[1]})")
@@ -20,7 +21,7 @@ def print_interval_info(series_info: SeriesInfo, interval_info: ConfidenceInterv
 def run_with_series(data: (SeriesInfoWithSourceSeries, float)):
     series_info, upsilon = data
     interval_info = calculate_confident_interval(series_info, upsilon)
-    print_interval_info(series_info, interval_info)
+    print_interval_info(series_info, upsilon, interval_info)
 
 
 def fill_empty_info(series_info: SeriesInfoWithCharacteristics):
@@ -56,7 +57,7 @@ def run_with_info(data: (SeriesInfoWithCharacteristics, float)):
     series_info, upsilon = data
     fill_empty_info(series_info)
     interval_info = calculate_confident_interval(series_info, upsilon)
-    print_interval_info(series_info, interval_info)
+    print_interval_info(series_info, upsilon, interval_info)
 
 
 def print_poisson_distribution_result(distribution_check_result: PoissonDistributionCheckResult):
@@ -66,6 +67,7 @@ def print_poisson_distribution_result(distribution_check_result: PoissonDistribu
     print(f"\n----------RESULT----------")
     print(f"\nSource distribution:")
     print(f"{distribution_check_result.source_distribution.set_index('i').T}")
+    print(f"Upsilon: {distribution_check_result.upsilon}")
     print(f"\nLambda parameter: {distribution_check_result.sample_lambda}")
     print(f"\nTheoretical poisson distribution:\n{distribution_check_result.theoretical_distribution.set_index('i').T}")
     print(f"\nChi2 observable: {distribution_check_result.chi2_observable}")

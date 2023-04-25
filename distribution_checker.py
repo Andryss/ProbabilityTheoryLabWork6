@@ -15,6 +15,7 @@ class DistributionInfo:
 
 class DistributionCheckResult:
     source_distribution: pd.DataFrame
+    upsilon: float
 
 
 class PoissonDistributionCheckResult(DistributionCheckResult):
@@ -30,6 +31,7 @@ def poisson_distribution_check(distribution_info: DistributionInfo, upsilon: flo
     data = distribution_info.data
     distribution_result = PoissonDistributionCheckResult()
     distribution_result.source_distribution = data.copy()
+    distribution_result.upsilon = upsilon
 
     # calculate poisson lambda
     number_of_samples = data['n_i'].sum()

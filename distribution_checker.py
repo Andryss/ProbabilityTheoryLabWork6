@@ -30,15 +30,22 @@ def poisson_distribution_check(distribution_info: DistributionInfo, upsilon: flo
     distribution_result = PoissonDistributionCheckResult()
     distribution_result.source_distribution = data.copy()
 
+    # calculate poisson lambda
     number_of_samples = data['n_i'].sum()
     lmbd = (data['i'] * data['n_i']).sum() / number_of_samples
 
+    # calculate theoretical data
     distribution_result.sample_lambda = lmbd
-    theoretical_data = data.assign(p_i=lambda col: col['i'].map(lambda val: lmbd ** val) / col['i'].map(lambda val: math.factorial(val)) * math.exp(-lmbd))
+    theoretical_data = data.assign(p_i=lambda col: col['i'].map(
+        lambda val: lmbd ** val) / col['i'].map(lambda val: math.factorial(val)) * math.exp(-lmbd))
     theoretical_data = theoretical_data.assign(n_i_thr=lambda col: round(col['p_i'] * number_of_samples))
 
+    # merge rows with (n * p_i < 5) WHY?
     merge_row = theoretical_data.shape[0] - 1
-    new_n_i, new_p_i, new_n_i_thr = theoretical_data.at[merge_row, 'n_i'], theoretical_data.at[merge_row, 'p_i'], theoretical_data.at[merge_row, 'n_i_thr']
+    new_n_i, new_p_i, new_n_i_thr = \
+        theoretical_data.at[merge_row, 'n_i'], \
+        theoretical_data.at[merge_row, 'p_i'], \
+        theoretical_data.at[merge_row, 'n_i_thr']
     while number_of_samples * new_p_i < 5:
         merge_row -= 1
         new_n_i += theoretical_data.at[merge_row, 'n_i']
@@ -48,15 +55,19 @@ def poisson_distribution_check(distribution_info: DistributionInfo, upsilon: flo
     merged_data = theoretical_data.drop(index=range(merge_row, theoretical_data.shape[0]))
     merged_data.loc[merge_row] = [-1, new_n_i, new_p_i, new_n_i_thr]
 
-    merged_data = merged_data.drop(['p_i'], axis=1).assign(chi2_i=lambda col: (col['n_i'] - col['n_i_thr']) ** 2 / col['n_i_thr'])
+    # calculate chi2 observable and critical
+    merged_data = merged_data.drop(['p_i'], axis=1)\
+        .assign(chi2_i=lambda col: (col['n_i'] - col['n_i_thr']) ** 2 / col['n_i_thr'])
     distribution_result.number_of_groups_after_merge = len(merged_data)
 
     chi2_observable = merged_data['chi2_i'].sum()
     distribution_result.chi2_observable = chi2_observable
 
-    chi2_critical = pearson_distribution_coefficient_resolver(distribution_result.number_of_groups_after_merge - 1 - 1, 1 - upsilon)
+    chi2_critical = \
+        pearson_distribution_coefficient_resolver(distribution_result.number_of_groups_after_merge - 2, 1 - upsilon)
     distribution_result.chi2_critical = chi2_critical
 
+    # make sentence
     distribution_result.is_poisson_distribution = chi2_observable < chi2_critical
 
     return distribution_result
